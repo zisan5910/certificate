@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>সার্টিফিকেট জেনারেটর</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, button { padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h2>সার্টিফিকেট জেনারেটর</h2>
+    <input type="text" id="nameInput" placeholder="নাম লিখুন">
+    <button onclick="generateCertificate()">সার্টিফিকেট ডাউনলোড</button>
+
+    <script>
+        async function generateCertificate() {
+            const name = document.getElementById('nameInput').value;
+            if(!name) return alert('নাম লিখুন');
+
+            // আপনার PDF ফাইল লোড করুন (Base64 এনকোডেড)
+            const pdfBytes = await fetch('cer.pdf').then(res => res.arrayBuffer());
+            
+            const { PDFDocument, rgb } = PDFLib;
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const page = pdfDoc.getPages()[0];
+            const { width, height } = page.getSize();
+            
+            // নামের পজিশন (আপনার PDF অনুযায়ী এডজাস্ট করুন)
+            page.drawText(name.toUpperCase(), {
+                x: width/2 - 100,  // অনুভূমিক পজিশন
+                y: height/2 + 50,  // উল্লম্ব পজিশন
+                size: 30,          // ফন্ট সাইজ
+                color: rgb(0, 0, 0) // কালো রঙ
+            });
+            
+            // ডাউনলোড
+            const newPdf = await pdfDoc.save();
+            const blob = new Blob([newPdf], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${name}_সার্টিফিকেট.pdf`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
